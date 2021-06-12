@@ -12,14 +12,25 @@ NetAddress myRemoteLocation;
 ArrayList<DataSender> senders = new ArrayList<DataSender>();
 
 int PORT = 12345;
-String textbuffer = "";
+
+int   WINO_AMOUNT = 2;
+float WINO_SPEED = 100000.0;
+
+int   PLANT_AMOUNT = 2;
+float PLANT_SPEED = 1000.0;
+
+int   GAME_AMOUNT = 1;
+int   GAME_SPEED = 1000;
+
 
 public class DataSender {
   int ID;
-  float value;
+  double value;
+  int seed;
    
   public DataSender(int ID_){
     ID = ID_;
+    seed = (int) random(12345);
   }
   
   void setValue(float v){
@@ -29,10 +40,18 @@ public class DataSender {
   String type(){
     return "undefined";
   }
+  
+  String addr(){
+   return "/"+type()+"/"+ID;
+  }
+  
+  String message(){
+    return addr() + "   " + value + "\n";
+  }
    
   void update(){
   
-    OscMessage myMessage = new OscMessage("/"+type()+"/"+ID);
+    OscMessage myMessage = new OscMessage(addr());
     myMessage.add(value); /* add an int to the osc message */
     oscP5.send(myMessage, myRemoteLocation); 
   }
@@ -51,7 +70,7 @@ public class Winogradsky extends DataSender {
   }
   
   void update(){
-    setValue(noise(frameCount));
+    setValue(noise(frameCount / WINO_SPEED + seed));
     super.update();
   } 
 }
@@ -67,15 +86,20 @@ public class Plant extends DataSender {
   }
   
   void update(){
-    setValue(noise(frameCount));
+    setValue(noise(frameCount / PLANT_SPEED + seed));
     super.update();
   } 
 }
 
 public class GamePress extends DataSender {
-   
+   int target = 0;
   public GamePress(int ID_){
     super(ID_);
+    setTarget();
+  }
+  
+  void setTarget(){
+    target = frameCount + (int)random(GAME_SPEED);
   }
   
   String type(){
@@ -83,28 +107,40 @@ public class GamePress extends DataSender {
   }
   
   void update(){
-    setValue(noise(frameCount));
+    boolean check = (frameCount == target);
+    
+    value = check?1.0:0.0;
+    if(check){
+      setTarget();
+    }
+    
     super.update();
-  } 
+  }
+  
+  
+  String message(){
+    return addr() + "   " + target + "->" + frameCount +"\n";
+  }
+  
 }
 
 void setup() {
-  size(400,400);
+  size(800,200);
 
   /* start oscP5, listening for incoming messages at port 12000 */
   oscP5 = new OscP5(this,1);
   myRemoteLocation = new NetAddress("127.0.0.1",PORT);
   frameRate(30);
   
-  for (int i = 0; i < 2; i++){
+  for (int i = 0; i < WINO_AMOUNT; i++){
      senders.add(new Winogradsky(i));
   }
   
-  for (int i = 0; i < 2; i++){
+  for (int i = 0; i < PLANT_AMOUNT; i++){
      senders.add(new Plant(i));
   }
   
-  for (int i = 0; i < 1; i++){
+  for (int i = 0; i < GAME_AMOUNT; i++){
      senders.add(new GamePress(i));
   }
 }
@@ -114,15 +150,20 @@ void draw() {
   background(0);
   //OscMessage myMessage = new OscMessage("/sensor1");
   //myMessage.add(noise(frameCount)); /* add an int to the osc message */
-  //oscP5.send(myMessage, myRemoteLocation); 
+  //oscP5.send(myMessage, myRemoteLocation);
   
-  for (int i = 0; i < senders.size(); i++){ 
-         senders.get(i).update();        
+  String text = "";
+  
+  for (int i = 0; i < senders.size(); i++){
+      DataSender s = senders.get(i);
+      s.update();
+      text += s.message();
+      rect(width/2, 18 + i*24, (float)s.value*width/2 + 3, 15);
     }
   
   
   textSize(15);
-  text(textbuffer, 10, 30);
+  text(text, 10, 30);
   
   
 }
