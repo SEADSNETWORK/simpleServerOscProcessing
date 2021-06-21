@@ -16,12 +16,16 @@ int PORT = 12345;
 int   WINO_AMOUNT = 2;
 float WINO_SPEED = 100000.0;
 
-int   PLANT_AMOUNT = 2;
+int   PLANT_AMOUNT = 3;
 float PLANT_SPEED = 1000.0;
+
+int   HUMIDITY_AMOUNT = 1;
+float HUMIDITY_SPEED = 1200.0;
 
 int   GAME_AMOUNT = 1;
 int   GAME_SPEED = 1000;
 
+boolean game_running = true;
 
 public class DataSender {
   int ID;
@@ -91,6 +95,22 @@ public class Plant extends DataSender {
   } 
 }
 
+public class Humidity extends DataSender {
+   
+  public Humidity(int ID_){
+    super(ID_);
+  }
+  
+  String type(){
+    return "humidity";
+  }
+  
+  void update(){
+    setValue(noise(frameCount / HUMIDITY_SPEED + seed));
+    super.update();
+  } 
+}
+
 public class GamePress extends DataSender {
    int target = 0;
   public GamePress(int ID_){
@@ -124,8 +144,9 @@ public class GamePress extends DataSender {
   
 }
 
+
 void setup() {
-  size(800,200);
+  size(800,230);
 
   /* start oscP5, listening for incoming messages at port 12000 */
   oscP5 = new OscP5(this,1);
@@ -140,9 +161,14 @@ void setup() {
      senders.add(new Plant(i));
   }
   
+  for (int i = 0; i < HUMIDITY_AMOUNT; i++){
+     senders.add(new Humidity(i));
+  }
+  
   for (int i = 0; i < GAME_AMOUNT; i++){
      senders.add(new GamePress(i));
   }
+
 }
 
 
@@ -160,10 +186,20 @@ void draw() {
       text += s.message();
       rect(width/2, 18 + i*24, (float)s.value*width/2 + 3, 15);
     }
-  
+    
+  text+= "game active: " + game_running + " (press space bar) \n";
   
   textSize(15);
   text(text, 10, 30);
   
+  OscMessage myMessage = new OscMessage("/gameactive/0");
+    myMessage.add(game_running); 
+    oscP5.send(myMessage, myRemoteLocation);
+}
+
+void keyPressed(){
+  if (key == ' '){
+    game_running = !game_running;
+  }
   
 }
