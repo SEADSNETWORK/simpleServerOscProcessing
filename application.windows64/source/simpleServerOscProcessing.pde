@@ -52,7 +52,7 @@ public class DataSender {
   void update(){
   
     OscMessage myMessage = new OscMessage(addr());
-    myMessage.add(value); /* add an int to the osc message */
+    myMessage.add((float)value); /* add an int to the osc message */
     oscP5.send(myMessage, myRemoteLocation); 
   }
   
