@@ -11,7 +11,6 @@
 - **Purpose:** _(add a one-line purpose under Overview in _project.md)_
 - **State:** development
 - **Deadline:** none set
-- **Snoozed until:** 2026-10-14
 - **Vault folder:** `Projects/art/seads`
 - **Website:** https://pietersteyaert.net/project/seads (suggested)
 
@@ -50,7 +49,6 @@
 - **Purpose:** _(add a one-line purpose under Overview in _project.md)_
 - **State:** development
 - **Deadline:** none set
-- **Snoozed until:** 2026-10-14
 - **Vault folder:** `Projects/art/seads`
 - **Website:** https://pietersteyaert.net/project/seads (suggested)
 
@@ -82,6 +80,12 @@
 - 
 
 #### Aux files
+
+### claude/handoff.md
+
+### Handoff · SEADS
+
+> Written by Claude when a session closes: what was done, what is open, the next step. Newest first.
 
 ### claude/decisions.md
 
